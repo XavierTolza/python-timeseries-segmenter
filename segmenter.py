@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib import gridspec
 from matplotlib.widgets import SpanSelector, RadioButtons
 from pandas import DataFrame
 from BColors.BColors import colors
@@ -8,12 +9,15 @@ from BColors.BColors import colors
 class Segmenter(object):
     def __init__(self, data):
         self.fig = fig = plt.figure(figsize=(15, 15))
-        self.axes = axe = fig.add_subplot(111)
         self.classes = np.unique(data["class"])
+        # Create axes
+        data_names = [i for i in data if i != "class"]
+        self.gs = gs = gridspec.GridSpec(len(data_names), 1)
+        self.axes = axes = [fig.add_subplot(i) for i in gs]
         self.data = data
         self.plot()
-        self.spans = SpanSelector(axe, self.onselect, 'horizontal', useblit=True,
-                                   rectprops=dict(alpha=0.5, facecolor='red'))
+        self.spans = [SpanSelector(axe, self.onselect, 'horizontal', useblit=True,
+                                   rectprops=dict(alpha=0.5, facecolor='red')) for axe in axes]
         rax = plt.axes((.01,.1,.1,.03*len(self.classes)))
         self.radio = radio = RadioButtons(rax, self.classes)
         radio.on_clicked(self.clicked_radio)
@@ -32,15 +36,18 @@ class Segmenter(object):
         return index
 
     def plot(self):
-        axe = self.axes
-        axe.cla()
+        for axe in self.axes:
+            axe.cla()
+            axe.grid()
         for class_name, data in self.data.groupby("class"):
             del data["class"]
             class_index = self.class_index(class_name)
             x = data.index.values
-            for y, name in zip(data.values.transpose(), data):
+            for axe, y, name in zip(self.axes, data.values.transpose(), data):
                 axe.scatter(x, y, color=colors[class_index])
-            axe.legend()
+                axe.set_ylabel(name)
+        self.gs.tight_layout(self.fig, rect=[0.1, 0.1, 1, 1])
+        plt.tight_layout()
 
     def run(self):
         self.plot()
