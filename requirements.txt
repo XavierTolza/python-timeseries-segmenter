@@ -1,0 +1,4 @@
+matplotlib
+numpy
+pandas
+git+https://github.com/XavierTolza/Bcolors.git@master
