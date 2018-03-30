@@ -12,9 +12,9 @@ if __name__ == '__main__':
     data = DataFrame(data,
                      index=np.linspace(0, 5, n_values), columns=columns)
     # Now data is correct, generate class for each sample
-    classes = np.array(["Class %i" % i for i in range(n_classes)])[np.linspace(0, n_classes-1, n_values).astype(int)]
+    classes = np.array(["Class %i" % i for i in range(n_classes)])[np.linspace(0, n_classes - 1, n_values).astype(int)]
     data["class"] = classes
-    
+
     # Run the UI
     s = dfs.Segmenter(data)
     res = s.run()

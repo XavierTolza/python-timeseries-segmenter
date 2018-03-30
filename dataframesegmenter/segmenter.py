@@ -16,12 +16,12 @@ class Segmenter(object):
         self.axes = axes = [fig.add_subplot(i) for i in gs]
         self.data = data
 
-        self.axe_zoom = axe_zoom = plt.axes((.15,.03,.84,.05))
+        self.axe_zoom = axe_zoom = plt.axes((.15, .03, .84, .05))
         self.span_zoom = SpanSelector(axe_zoom, self.select_zoom, 'horizontal', useblit=True,
                                       rectprops=dict(alpha=0.5, facecolor='green'))
         self.spans = [SpanSelector(axe, self.onselect, 'horizontal', useblit=True,
                                    rectprops=dict(alpha=0.5, facecolor='red')) for axe in axes]
-        self.radio_axe = rax = plt.axes((0.005,.1,.1,.03*len(self.classes)))
+        self.radio_axe = rax = plt.axes((0.005, .1, .1, .03 * len(self.classes)))
         self.radio = radio = RadioButtons(rax, self.classes)
         radio.on_clicked(self.clicked_radio)
         self.current_class_index = 0
@@ -44,9 +44,9 @@ class Segmenter(object):
         index = np.where(self.classes == class_name)[0][0]
         return index
 
-    def select_zoom(self, min, max):
-        data = [min, max]
-        self.zoom = np.array([np.min(data),np.max(data)])
+    def select_zoom(self, start, stop):
+        data = [start, stop]
+        self.zoom = np.array([np.min(data), np.max(data)])
         self.plot()
 
     @property
@@ -63,7 +63,7 @@ class Segmenter(object):
 
     def plot(self):
         zoom = self.zoom
-        zoom_margin = np.abs(zoom[1]-zoom[0])*0.01
+        zoom_margin = np.abs(zoom[1] - zoom[0]) * 0.01
         zoom = zoom + zoom_margin * np.array([-1, 1])
 
         for axe in self.axes:
@@ -87,11 +87,11 @@ class Segmenter(object):
             data = self.data_filtered
             x = data.index.values
             for i, (d, name) in enumerate(zip(self.data.values.transpose(), data)):
-                axe_zoom.plot(x, d, label=name, color=colors[i], zorder=i+10)
+                axe_zoom.plot(x, d, label=name, color=colors[i], zorder=i + 10)
             # axe_zoom.set_xlim(x.min(), x.max())
             self.zoom_ylim = ylim = axe_zoom.get_ylim()
             self.zoom_xlim = xlim = axe_zoom.get_xlim()
-        self.zoom_fill = axe_zoom.fill_between(zoom, [ylim[0]]*2, [ylim[1]]*2, color="green", alpha=".1", zorder=0)
+        self.zoom_fill = axe_zoom.fill_between(zoom, [ylim[0]] * 2, [ylim[1]] * 2, color="green", alpha=".1", zorder=0)
         axe_zoom.set_xlim(xlim)
         self.gs.tight_layout(self.fig, rect=[0.1, 0.1, 1, 1])
 
