@@ -1,3 +1,5 @@
+from Tkinter import TclError
+
 import matplotlib.pyplot as plt
 import numpy as np
 from BColors.BColors import colors
@@ -12,7 +14,7 @@ class Segmenter(object):
     class PlotMethod(object):
         SCATTER = 0
         PLOT = 1
-    def __init__(self, data, plot_method=PlotMethod.SCATTER, classes=[], **kwargs):
+    def __init__(self, data, plot_method=PlotMethod.SCATTER, classes=[], ion=True, **kwargs):
         self.fig = fig = plt.figure(figsize=(15, 15))
         self.classes = np.unique(data["class"].values.tolist()+classes)
         # Create axes
@@ -36,7 +38,9 @@ class Segmenter(object):
         self.zoom_fill = None
         self.plot_method = plot_method
         self.kwargs = kwargs
+        self.ion = ion
         self.plot()
+        self.running = False
         self.__create_legend()
 
     def clicked_radio(self, class_name):
@@ -109,9 +113,29 @@ class Segmenter(object):
         axe_zoom.set_xlim(xlim)
         self.gs.tight_layout(self.fig, rect=[0.1, 0.1, 1, 1])
 
+    @property
+    def fignum(self):
+        return self.fig.number
+
+    @property
+    def fig_opened(self):
+        return plt.fignum_exists(self.fignum)
+
     def run(self):
         self.plot()
-        plt.show()
+        self.running = True
+        if self.ion:
+            plt.ion()
+            plt.show()
+            while self.fig_opened:
+                try:
+                    plt.pause(1)
+                except TclError:
+                    pass
+        else:
+            plt.show()
+        self.running = False
+
         return self.data
 
     def onselect(self, xmin, xmax):
