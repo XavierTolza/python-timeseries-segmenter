@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib import gridspec
-from matplotlib.widgets import SpanSelector, RadioButtons
-from pandas import DataFrame
 from BColors.BColors import colors
+from matplotlib import gridspec
+import matplotlib.patches as mpatches
+from matplotlib.widgets import SpanSelector, RadioButtons
 
 
 class Segmenter(object):
@@ -21,14 +21,16 @@ class Segmenter(object):
                                       rectprops=dict(alpha=0.5, facecolor='green'))
         self.spans = [SpanSelector(axe, self.onselect, 'horizontal', useblit=True,
                                    rectprops=dict(alpha=0.5, facecolor='red')) for axe in axes]
-        rax = plt.axes((0.005,.1,.1,.03*len(self.classes)))
+        self.radio_axe = rax = plt.axes((0.005,.1,.1,.03*len(self.classes)))
         self.radio = radio = RadioButtons(rax, self.classes)
         radio.on_clicked(self.clicked_radio)
         self.current_class_index = 0
         self.zoom = np.array([np.min(data.index.values), np.max(data.index.values)])
         self.zoom_ylim = None
+        self.zoom_xlim = None
         self.zoom_fill = None
         self.plot()
+        self.__create_legend()
 
     def clicked_radio(self, class_name):
         index = self.class_index(class_name)
@@ -49,7 +51,15 @@ class Segmenter(object):
 
     @property
     def data_filtered(self):
-        return self.data[[i for i in data if i != "class"]]
+        return self.data[[i for i in self.data if i != "class"]]
+
+    def __create_legend(self):
+        patches = []
+        for class_index, class_name in enumerate(self.classes):
+            patches.append(mpatches.Patch(color=colors[class_index], label=class_name))
+        n_classes = len(self.classes)
+        self.radio_axe.legend(handles=patches, loc=3, mode="expand",
+                              bbox_to_anchor=(0., 1.02, 1., .102 * n_classes))
 
     def plot(self):
         zoom = self.zoom
@@ -71,16 +81,18 @@ class Segmenter(object):
         axe_zoom = self.axe_zoom
         if self.zoom_ylim:
             ylim = self.zoom_ylim
+            xlim = self.zoom_xlim
             self.zoom_fill.remove()
         else:
             data = self.data_filtered
             x = data.index.values
             for i, (d, name) in enumerate(zip(self.data.values.transpose(), data)):
                 axe_zoom.plot(x, d, label=name, color=colors[i], zorder=i+10)
-            axe_zoom.set_xlim(x.min(), x.max())
-            ylim = axe_zoom.get_ylim()
-            self.zoom_ylim = ylim
+            # axe_zoom.set_xlim(x.min(), x.max())
+            self.zoom_ylim = ylim = axe_zoom.get_ylim()
+            self.zoom_xlim = xlim = axe_zoom.get_xlim()
         self.zoom_fill = axe_zoom.fill_between(zoom, [ylim[0]]*2, [ylim[1]]*2, color="green", alpha=".1", zorder=0)
+        axe_zoom.set_xlim(xlim)
         self.gs.tight_layout(self.fig, rect=[0.1, 0.1, 1, 1])
 
     def run(self):
@@ -91,16 +103,3 @@ class Segmenter(object):
     def onselect(self, xmin, xmax):
         self.data.loc[xmin:xmax]["class"] = self.class_name(self.current_class_index)
         self.plot()
-
-if __name__ == '__main__':
-    n_values = 1000
-    n_classes = 4
-    classes = np.array(["Class %i" % i for i in range(n_classes)])[np.linspace(0, n_classes-1, n_values).astype(int)]
-    columns = "A,B,C,D".split(",")
-    data = np.cumsum(np.random.normal(0, .1, (n_values, len(columns))), 0)
-    data = DataFrame(data,
-                     index=np.linspace(0, 5, n_values), columns=columns)
-    data["class"] = classes
-    s = Segmenter(data)
-    res = s.run()
-    print(res)
