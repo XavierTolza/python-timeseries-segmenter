@@ -7,7 +7,10 @@ from matplotlib.widgets import SpanSelector, RadioButtons
 
 
 class Segmenter(object):
-    def __init__(self, data):
+    class PlotMethod(object):
+        SCATTER = 0
+        PLOT = 1
+    def __init__(self, data, plot_method=PlotMethod.SCATTER, **kwargs):
         self.fig = fig = plt.figure(figsize=(15, 15))
         self.classes = np.unique(data["class"])
         # Create axes
@@ -29,6 +32,8 @@ class Segmenter(object):
         self.zoom_ylim = None
         self.zoom_xlim = None
         self.zoom_fill = None
+        self.plot_method = plot_method
+        self.kwargs = kwargs
         self.plot()
         self.__create_legend()
 
@@ -75,7 +80,14 @@ class Segmenter(object):
             x = data.index.values
             selector = np.logical_and(x > zoom[0], x < zoom[1])
             for axe, y, name in zip(self.axes, data.values.transpose(), data):
-                axe.scatter(x[selector], y[selector], color=colors[class_index])
+                kwargs = dict(color=colors[class_index])
+                kwargs.update(self.kwargs)
+                if self.plot_method == self.PlotMethod.SCATTER:
+                    axe.scatter(x[selector], y[selector], **kwargs)
+                elif self.plot_method == self.PlotMethod.PLOT:
+                    axe.plot(x[selector], y[selector], **kwargs)
+                else:
+                    raise ValueError("Incorrect plot method: %i" % self.plot_method)
                 axe.set_ylabel(name)
 
         axe_zoom = self.axe_zoom

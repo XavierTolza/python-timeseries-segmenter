@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='dataframesegmenter',
-    version='1.0',
+    version='1.1',
     description="Interactively clusterize your timeseries datasets",
     packages=["dataframesegmenter"],
     install_requires=[

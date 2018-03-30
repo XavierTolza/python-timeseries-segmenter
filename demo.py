@@ -19,5 +19,9 @@ if __name__ == '__main__':
     s = dfs.Segmenter(data)
     res = s.run()
 
+    # Run the UI in plot mode
+    s = dfs.Segmenter(data, plot_method=dfs.Segmenter.PlotMethod.PLOT, lw=.5)
+    res = s.run()
+
     # The result is the same dataframe as input, but with classes updated
     print(res)
