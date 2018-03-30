@@ -5,14 +5,16 @@ from matplotlib import gridspec
 import matplotlib.patches as mpatches
 from matplotlib.widgets import SpanSelector, RadioButtons
 
+from dataframesegmenter.tools import segment_dataframe_per_column
+
 
 class Segmenter(object):
     class PlotMethod(object):
         SCATTER = 0
         PLOT = 1
-    def __init__(self, data, plot_method=PlotMethod.SCATTER, **kwargs):
+    def __init__(self, data, plot_method=PlotMethod.SCATTER, classes=[], **kwargs):
         self.fig = fig = plt.figure(figsize=(15, 15))
-        self.classes = np.unique(data["class"])
+        self.classes = np.unique(data["class"].values.tolist()+classes)
         # Create axes
         data_names = [i for i in data if i != "class"]
         self.gs = gs = gridspec.GridSpec(len(data_names), 1)
@@ -74,7 +76,7 @@ class Segmenter(object):
         for axe in self.axes:
             axe.cla()
             axe.grid()
-        for class_name, data in self.data.groupby("class"):
+        for class_name, data in segment_dataframe_per_column(self.data, "class"):
             del data["class"]
             class_index = self.class_index(class_name)
             x = data.index.values
@@ -113,5 +115,5 @@ class Segmenter(object):
         return self.data
 
     def onselect(self, xmin, xmax):
-        self.data.loc[xmin:xmax]["class"] = self.class_name(self.current_class_index)
+        self.data.loc[xmin:xmax, "class"] = self.class_name(self.current_class_index)
         self.plot()
