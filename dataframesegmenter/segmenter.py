@@ -2,13 +2,16 @@ from Tkinter import TclError
 
 import matplotlib.pyplot as plt
 import numpy as np
-from BColors.BColors import colors
 from matplotlib import gridspec
 import matplotlib.patches as mpatches
 from matplotlib.widgets import SpanSelector, RadioButtons
 
 from dataframesegmenter.tools import segment_dataframe_per_column
 
+colors_list = [u'#1f77b4', u'#ff7f0e', u'#2ca02c', u'#d62728', u'#9467bd',
+              u'#8c564b', u'#e377c2', u'#7f7f7f', u'#bcbd22', u'#17becf']
+def get_color(i):
+    return colors_list[i % len(colors_list)]
 
 class Segmenter(object):
     class PlotMethod(object):
@@ -67,7 +70,7 @@ class Segmenter(object):
     def __create_legend(self):
         patches = []
         for class_index, class_name in enumerate(self.classes):
-            patches.append(mpatches.Patch(color=colors[class_index], label=class_name))
+            patches.append(mpatches.Patch(color=get_color(class_index), label=class_name))
         n_classes = len(self.classes)
         self.radio_axe.legend(handles=patches, loc=3, mode="expand",
                               bbox_to_anchor=(0., 1.02, 1., .102 * n_classes))
@@ -86,7 +89,7 @@ class Segmenter(object):
             x = data.index.values
             selector = np.logical_and(x > zoom[0], x < zoom[1])
             for axe, y, name in zip(self.axes, data.values.transpose(), data):
-                kwargs = dict(color=colors[class_index])
+                kwargs = dict(color=get_color(class_index))
                 kwargs.update(self.kwargs)
                 if self.plot_method == self.PlotMethod.SCATTER:
                     axe.scatter(x[selector], y[selector], **kwargs)
@@ -105,7 +108,7 @@ class Segmenter(object):
             data = self.data_filtered
             x = data.index.values
             for i, (d, name) in enumerate(zip(self.data.values.transpose(), data)):
-                axe_zoom.plot(x, d, label=name, color=colors[i], zorder=i + 10)
+                axe_zoom.plot(x, d, label=name, color=get_color(i), zorder=i + 10)
             # axe_zoom.set_xlim(x.min(), x.max())
             self.zoom_ylim = ylim = axe_zoom.get_ylim()
             self.zoom_xlim = xlim = axe_zoom.get_xlim()
