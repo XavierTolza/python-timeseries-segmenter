@@ -1,4 +1,3 @@
-matplotlib
-numpy
-pandas
-git+https://github.com/XavierTolza/Bcolors.git@master
+matplotlib==3.0.2
+numpy==1.16.1
+pandas==0.24.1

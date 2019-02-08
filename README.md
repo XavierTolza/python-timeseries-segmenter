@@ -5,6 +5,7 @@
 ## Install
 
 ```bash
+sudo apt install python3-tk
 pip install git+https://github.com/XavierTolza/python-timeseries-segmenter.git
 ```
 Or add `git+https://github.com/XavierTolza/python-timeseries-segmenter.git` to you `requirements.txt`:
@@ -34,6 +35,6 @@ print(res)
 ```
 
 ## Dependencies
-- matplotlib
-- numpy
-- Does not require pandas, you might have some trouble if you don't have it ;)
+Python 3.6, tested on Linux Ubuntu 18.04
+- python-tk package
+- See `requirements.txt` for other dependencies

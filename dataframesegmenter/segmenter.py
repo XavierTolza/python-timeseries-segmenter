@@ -1,4 +1,4 @@
-from Tkinter import TclError
+from tkinter import TclError
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -11,7 +11,7 @@ from dataframesegmenter.tools import segment_dataframe_per_column
 colors_list = [u'#1f77b4', u'#ff7f0e', u'#2ca02c', u'#d62728', u'#9467bd',
               u'#8c564b', u'#e377c2', u'#7f7f7f', u'#bcbd22', u'#17becf']
 def get_color(i):
-    return colors_list[i % len(colors_list)]
+    return colors_list[int(i) % len(colors_list)]
 
 class Segmenter(object):
     class PlotMethod(object):
@@ -20,6 +20,11 @@ class Segmenter(object):
     def __init__(self, data, plot_method=PlotMethod.SCATTER, classes=[], ion=True, **kwargs):
         self.fig = fig = plt.figure(figsize=(15, 15))
         self.classes = np.unique(data["class"].values.tolist()+classes)
+
+        # Security check
+        if "class" not in data:
+            raise ValueError("You must have a class column in your data")
+
         # Create axes
         data_names = [i for i in data if i != "class"]
         self.gs = gs = gridspec.GridSpec(len(data_names), 1)
@@ -49,13 +54,15 @@ class Segmenter(object):
     def clicked_radio(self, class_name):
         index = self.class_index(class_name)
         self.current_class_index = index
-        print "Selected class %i" % index
+        print("Selected class %i" % index)
 
     def class_name(self, class_index):
         return self.classes[class_index]
 
     def class_index(self, class_name):
-        index = np.where(self.classes == class_name)[0][0]
+        index = np.where(self.classes == class_name)[0]
+        if not len(index):
+            raise ValueError("Class %s not found in your dataset" % class_name)
         return index
 
     def select_zoom(self, start, stop):
