@@ -9,14 +9,18 @@ from matplotlib.widgets import SpanSelector, RadioButtons
 from dataframesegmenter.tools import segment_dataframe_per_column
 
 colors_list = [u'#1f77b4', u'#ff7f0e', u'#2ca02c', u'#d62728', u'#9467bd',
-              u'#8c564b', u'#e377c2', u'#7f7f7f', u'#bcbd22', u'#17becf']
+               u'#8c564b', u'#e377c2', u'#7f7f7f', u'#bcbd22', u'#17becf']
+
+
 def get_color(i):
     return colors_list[int(i) % len(colors_list)]
+
 
 class Segmenter(object):
     class PlotMethod(object):
         SCATTER = 0
         PLOT = 1
+
     def __init__(self, data, plot_method=PlotMethod.SCATTER, classes=[], ion=True, **kwargs):
         self.fig = fig = plt.figure(figsize=(15, 15))
         data = data.astype({"class": str}, axis=1)
@@ -115,7 +119,10 @@ class Segmenter(object):
         else:
             data = self.data_filtered
             x = data.index.values
-            for i, (d, name) in enumerate(zip(self.data.values.transpose(), data)):
+            y = data.values.transpose()
+            y = y - y.min(axis=1)[:, None]
+            y = y / y.max(axis=1)[:, None]
+            for i, (d, name) in enumerate(zip(y, data)):
                 axe_zoom.plot(x, d, label=name, color=get_color(i), zorder=i + 10)
             # axe_zoom.set_xlim(x.min(), x.max())
             self.zoom_ylim = ylim = axe_zoom.get_ylim()
