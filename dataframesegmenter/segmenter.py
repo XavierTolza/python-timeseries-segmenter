@@ -19,7 +19,8 @@ class Segmenter(object):
         PLOT = 1
     def __init__(self, data, plot_method=PlotMethod.SCATTER, classes=[], ion=True, **kwargs):
         self.fig = fig = plt.figure(figsize=(15, 15))
-        self.classes = np.unique(data["class"].values.tolist()+classes)
+        data = data.astype({"class": str}, axis=1)
+        self.classes = np.unique(data["class"].values.tolist() + classes)
 
         # Security check
         if "class" not in data:
